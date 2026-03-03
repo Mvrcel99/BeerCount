@@ -1,0 +1,39 @@
+:root {
+  --color-primary: #d97706;
+  --color-primary-600: #b45309;
+  --color-primary-700: #92400e;
+
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text: #0f172a;
+  --color-muted: #475569;
+  --color-border: #e2e8f0;
+
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.12);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --font-sans: "Source Sans 3", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+.dark {
+  --color-bg: #0b1220;
+  --color-surface: #111827;
+  --color-text: #f8fafc;
+  --color-muted: #cbd5f5;
+  --color-border: #1f2937;
+}
