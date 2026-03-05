@@ -1,7 +1,29 @@
-import LandingPage from './pages/LandingPage'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import Footer from './components/Footer'
+import Header from './components/Header'
+import Dashboard from './pages/Dashboard'
+import Datenschutz from './pages/Datenschutz'
+import Events from './pages/Events'
+import Impressum from './pages/Impressum'
 
 function App() {
-  return <LandingPage />
+  return (
+    <BrowserRouter>
+      <div className="page">
+        <Header />
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/impressum" element={<Impressum />} />
+            <Route path="/datenschutz" element={<Datenschutz />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </BrowserRouter>
+  )
 }
 
 export default App
