@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsDateString, IsEnum, IsOptional } from 'class-validator';
 
 export enum AggregateWindow {
   DAY = 'day',
@@ -12,4 +12,12 @@ export class GetAggregatedQueryDto {
   @IsOptional()
   @IsEnum(AggregateWindow)
   window?: AggregateWindow = AggregateWindow.WEEK;
+
+  @ApiPropertyOptional({ 
+    description: 'Startdatum für die Abfrage (ISO-Format). Standard: vor 30 Tagen.', 
+    example: '2024-03-01T00:00:00Z' 
+  })
+  @IsOptional()
+  @IsDateString() // Validiert, dass es ein echtes Datum ist
+  startDate?: string;
 }

@@ -43,5 +43,5 @@ export class EventsController {
 
   @Get('aggregate')
   getAggregated(@Query() query: GetAggregatedQueryDto) {
-  return this.eventsService.getAggregated(query.window || AggregateWindow.WEEK);  }
+  return this.eventsService.getAggregated(query.window || AggregateWindow.WEEK, query.startDate);  }
 }

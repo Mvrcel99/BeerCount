@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Point } from '@influxdata/influxdb-client';
 import { InfluxDbService } from '../influxdb/influxdb.service';
 import { CreateEventDto, EventType } from './dto/create-event.dto'; // <-- EventType importieren
@@ -81,8 +81,12 @@ export class EventsService {
     return results;
   }
 
-  async getAggregated(window: AggregateWindow): Promise<any[]> {
+async getAggregated(window: AggregateWindow, startDate?: string): Promise<any[]> {
     const queryApi = this.influx.getQueryApi();
+
+    if (startDate && new Date(startDate) > new Date()) {
+      throw new BadRequestException('Startdatum darf nicht in der Zukunft liegen');
+    }
 
     const windowMap = {
       [AggregateWindow.DAY]: '1d',
@@ -90,14 +94,15 @@ export class EventsService {
       [AggregateWindow.MONTH]: '1mo'
     };
     const every = windowMap[window];
+    
+    const startRange = startDate ? `time(v: "${startDate}")` : '-30d';
 
     const query = `
       from(bucket: "${this.influx.bucket}")
-        |> range(start: 0)
+        |> range(start: ${startRange})
         |> filter(fn: (r) => r._measurement == "bier_event" and r._field == "anzahl")
-        |> aggregateWindow(every: ${every}, fn: sum, createEmpty: false)
-        |> group(columns: ["studentId", "_start"])
-        |> sum(column: "_value")
+        |> group(columns: ["studentId"])
+        |> aggregateWindow(every: ${every}, fn: sum, createEmpty: false, timeSrc: "_start")
     `;
 
     const results: any[] = [];
@@ -107,7 +112,7 @@ export class EventsService {
           const obj = tableMeta.toObject(row);
           results.push({
             studentId: obj.studentId,
-            window: obj._start,
+            window: obj._time, // _time sollte jetzt das korrekte Datum des Fensters enthalten
             summe: obj._value,
           });
         },
