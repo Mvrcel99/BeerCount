@@ -1,8 +1,8 @@
-# 🍻 Bier Counter - Event Logging Backend
+# Bier Counter - Event Logging Backend
 
 Dieses Projekt ist das Backend für den "Bier Counter" (Neue Datenbankkonzepte). Es nutzt **NestJS** als API-Framework und **InfluxDB** als Time-Series-Datenbank, um Events (Störungen/Bier-Schulden) revisionssicher zu loggen.
 
-## 🛠️ Voraussetzungen
+## Voraussetzungen
 Bevor du startest, stelle sicher, dass Folgendes auf deinem Rechner installiert ist:
 * **Node.js** (v18 oder höher empfohlen)
 * **npm** (Node Package Manager)
