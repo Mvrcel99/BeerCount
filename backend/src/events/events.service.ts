@@ -3,12 +3,20 @@ import { Point } from '@influxdata/influxdb-client';
 import { InfluxDbService } from '../influxdb/influxdb.service';
 import { CreateEventDto, EventType } from './dto/create-event.dto'; // <-- EventType importieren
 import { AggregateWindow } from './dto/get-aggregated-query.dto'; // <-- AggregateWindow importieren
+import { StudentsService } from '../students/students.service';
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly influx: InfluxDbService) {}
+  constructor(private readonly influx: InfluxDbService,
+    private readonly studentsService: StudentsService
+  ) {}
 
   async createEvent(dto: CreateEventDto) {
+    const student = await this.studentsService.getStudentById(dto.studentId);
+    if(!student) {
+      throw new BadRequestException(`Student mit ID ${dto.studentId} existiert nicht`);
+    }
+
     const writeApi = this.influx.getWriteApi();
     
     const eventTyp = dto.typ || EventType.PLUS; 
@@ -28,6 +36,11 @@ export class EventsService {
   }
 
   async createCorrection(studentId: string, begruendung: string, anzahl: number) {
+    const student = await this.studentsService.getStudentById(studentId);
+    if(!student) {
+      throw new BadRequestException(`Student mit ID ${studentId} existiert nicht`);
+    }
+    
     const writeApi = this.influx.getWriteApi();
 
     const point = new Point('bier_event')
@@ -44,6 +57,13 @@ export class EventsService {
   }
 
   async getEvents(studentId?: string): Promise<any[]> {
+    if (studentId) {    
+      const student = await this.studentsService.getStudentById(studentId);
+      if(!student) {
+        throw new BadRequestException(`Student mit ID ${studentId} existiert nicht`);
+      }
+    }
+    
     const queryApi = this.influx.getQueryApi();
 
     const filter = studentId
