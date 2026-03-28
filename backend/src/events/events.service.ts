@@ -143,4 +143,34 @@ async getAggregated(window: AggregateWindow, startDate?: string): Promise<any[]>
 
     return results;
   }
+
+// DEV: Testdaten in InfluxDB einfügen
+async seedTestData() {
+  const writeApi = this.influx.getWriteApi();
+  const students = await this.studentsService.getAllStudents().then(s => s.map(stu => stu.studentId));
+  if(students.length === 0) {
+    throw new BadRequestException('Keine Studenten gefunden. Bitte zuerst Studenten anlegen.');
+  }
+  const vorlesungen = ['Web-Engineering', 'Datenbanken', 'Mathe'];
+  
+  // Wir erstellen 20 Events verteilt über die letzten 30 Tage
+  for (let i = 0; i < 20; i++) {
+    const eventDate = new Date();
+    // Zufällige Verteilung: Gehe i Tage zurück
+    eventDate.setDate(eventDate.getDate() - i); 
+    
+    const point = new Point('bier_event')
+      .tag('studentId', students[i % 2]) // Abwechselnd
+      .tag('vorlesung', vorlesungen[i % 3])
+      .tag('typ', 'plus')
+      .stringField('begruendung', `Automatischer Testeintrag #${i}`)
+      .intField('anzahl', 1)
+      .timestamp(eventDate); // <--- Das setzt das Datum in die Vergangenheit!
+
+    writeApi.writePoint(point);
+  }
+
+  await writeApi.close();
+  return { message: '20 Test-Events erfolgreich generiert!' };
+}
 }

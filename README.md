@@ -21,23 +21,7 @@ docker-compose up -d
 
 *Das InfluxDB-Dashboard ist nun unter `http://localhost:8086` erreichbar (Login: admin / biercounter123).*
 
-### 2. Umgebungsvariablen (.env) anlegen
-
-Erstelle im `backend`-Ordner eine Datei namens `.env` und füge folgende Zugangsdaten ein:
-
-```env
-PORT=3000
-NODE_ENV=development
-
-# InfluxDB Konfiguration
-INFLUX_URL=http://localhost:8086
-INFLUX_TOKEN=super-secret-auth-token
-INFLUX_ORG=dhbw
-INFLUX_BUCKET=bier_events
-
-```
-
-### 3. Backend-Abhängigkeiten installieren
+### 2. Backend-Abhängigkeiten installieren
 
 Wechsle in den `backend`-Ordner und installiere die benötigten Node-Pakete:
 
@@ -47,7 +31,7 @@ npm install
 
 ```
 
-### 4. Server starten
+### 3. Server starten
 
 Starte das NestJS-Backend im Entwicklungsmodus (mit Auto-Reload):
 

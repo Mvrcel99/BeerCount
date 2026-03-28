@@ -12,11 +12,19 @@ import { ApiTags } from '@nestjs/swagger';
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
+  // DEV
+
+  @Post('dev') // Nur für Entwicklungszwecke, um Events ohne Auth zu erstellen
+  createEventDev() {
+    return this.eventsService.seedTestData();
+  }
+  // US 1 (Student) US 3 (Begründung)
   @Post()
   createEvent(@Body() dto: CreateEventDto) {
     return this.eventsService.createEvent(dto);
   }
 
+  // US 2 (Kurssprecher)
   @Post('minus')
   createMinus(@Body() dto: CreateMinusDto) {
     return this.eventsService.createEvent({
@@ -27,6 +35,7 @@ export class EventsController {
     });
   }
 
+  // US 8 (Admin)
   @Post('correct')
   createCorrection(@Body() dto: CreateCorrectionDto) {
     return this.eventsService.createCorrection(
@@ -36,11 +45,13 @@ export class EventsController {
     );
   }
 
+  // US 7 (Student) Historie
   @Get()
   getEvents(@Query() query: GetEventsQueryDto) {
     return this.eventsService.getEvents(query.studentId);
   }
 
+  // US 9 (Student) Zeitraum-Aggregation
   @Get('aggregate')
   getAggregated(@Query() query: GetAggregatedQueryDto) {
   return this.eventsService.getAggregated(query.window || AggregateWindow.WEEK, query.startDate);  }
