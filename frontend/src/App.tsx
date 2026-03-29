@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard'
 import Datenschutz from './pages/Datenschutz'
 import Events from './pages/Events'
 import Impressum from './pages/Impressum'
+import AdminPanel from './pages/AdminPanel'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -16,6 +18,22 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/events" element={<Events />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/impressum" element={<Impressum />} />
             <Route path="/datenschutz" element={<Datenschutz />} />
           </Routes>

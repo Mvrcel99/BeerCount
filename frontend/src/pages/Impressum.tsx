@@ -15,9 +15,8 @@ export default function Impressum() {
           <p>
             Die Inhalte dieser Anwendung wurden mit Sorgfalt erstellt. Eine Haftung fuer
             die Richtigkeit, Vollstaendigkeit und Aktualitaet kann jedoch nicht
-            uebernommen werden.
+            übernommen werden.
           </p>
-          <p>Hinweis: Dies ist ein Pruefungsprojekt.</p>
         </div>
       </div>
     </section>
