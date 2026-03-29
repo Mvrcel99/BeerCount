@@ -1,5 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { Roles } from './common/decorators/roles.decorator';
+import { Role } from './common/enums/role.enum';
 import { InfluxDbService } from './influxdb/influxdb.service'; // WICHTIG: Unseren neuen Service importieren
 
 @Controller()
@@ -7,23 +9,25 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly influx: InfluxDbService, // Hier binden wir InfluxDB ein
-  ) {}
+  ) { }
 
   @Get()
+  @Roles(Role.ADMIN, Role.STUDENT, Role.KURSSPRECHER)
   getHello(): string {
     return this.appService.getHello();
   }
 
   @Get('health')
+  @Roles(Role.ADMIN, Role.STUDENT, Role.KURSSPRECHER)
   async health() {
     try {
       const queryApi = this.influx.getQueryApi();
-      
+
       // Eine korrekte Flux-Query, die eine Tabelle (Stream) generiert
       const query = `
         import "array"
         array.from(rows: [{status: "ok"}])
-      `; 
+      `;
       await queryApi.collectRows(query);
 
       return { ok: true, database: 'InfluxDB is connected and running! 🍻' };

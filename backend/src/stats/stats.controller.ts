@@ -1,11 +1,14 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { StatsService } from './stats.service';
 import { AccessGuard } from '../common/guards/access/access.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
 
+@Roles(Role.ADMIN, Role.STUDENT, Role.KURSSPRECHER)
 @UseGuards(AccessGuard)
 @Controller('stats')
 export class StatsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly statsService: StatsService) { }
 
   // US 6 – Zeitverlauf der Schulden
   @Get('timeline')

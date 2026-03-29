@@ -2,14 +2,18 @@ import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { AccessGuard } from '../common/guards/access/access.guard';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
 
+@Roles(Role.ADMIN, Role.STUDENT, Role.KURSSPRECHER)
 @UseGuards(AccessGuard)
 @Controller('students')
 export class StudentsController {
-  constructor(private readonly studentsService: StudentsService) {}
+  constructor(private readonly studentsService: StudentsService) { }
 
   // US 5 – Student anlegen (Admin)
   @Post()
+  @Roles(Role.ADMIN)
   createStudent(@Body() dto: CreateStudentDto) {
     return this.studentsService.createStudent(dto);
   }

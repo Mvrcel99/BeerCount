@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { AccessGuard } from './common/guards/access/access.guard';
@@ -49,7 +49,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // To enable the AccessGuard globally, uncomment the following line:
-  app.useGlobalGuards(new AccessGuard());
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(new AccessGuard(reflector));
 
   await app.listen(process.env.PORT ?? 3000);
 }
