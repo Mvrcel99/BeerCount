@@ -1,29 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import UserCreationForm from '../components/admin/UserCreationForm'
-import { CorrectionService, type EventRecord } from '../services/CorrectionService'
+import {
+  DataService,
+  type Balance,
+  type EventRecord,
+  type Student,
+} from '../services/DataService'
 import {
   ROLE_OPTIONS,
   getRoleAssignments,
   setRoleAssignments,
   type RoleAssignments,
   type UserRole,
+  getRequestAccessKey,
+  isAdminAccessKeyActive,
 } from '../auth/roles'
-
-type Student = {
-  studentId: string
-  name: string
-  kurs?: string
-}
-
-type Balance = {
-  studentId: string
-  name: string
-  kurs?: string
-  striche: number
-}
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
-const ACCESS_KEY = import.meta.env.VITE_ACCESS_KEY ?? ''
+import { useRole } from '../auth/useRole'
+import { SeedService } from '../services/SeedService'
 
 export default function AdminDashboard() {
   const [events, setEvents] = useState<EventRecord[]>([])
@@ -33,6 +26,10 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [reasons, setReasons] = useState<Record<string, string>>({})
   const [busyKey, setBusyKey] = useState<string | null>(null)
+  const [seedMessage, setSeedMessage] = useState<string | null>(null)
+  const [seedError, setSeedError] = useState<string | null>(null)
+  const [isSeeding, setIsSeeding] = useState(false)
+  const role = useRole()
   const [roleAssignments, setRoleAssignmentsState] = useState<RoleAssignments>(() =>
     getRoleAssignments(),
   )
@@ -44,48 +41,35 @@ export default function AdminDashboard() {
 
   const totalBalance = balances.reduce((sum, item) => sum + (item.striche || 0), 0)
 
+  const loadData = async (showLoading = true) => {
+    if (showLoading) setIsLoading(true)
+    setError(null)
+    try {
+      const [eventsData, studentsData, balancesData] = await Promise.all([
+        DataService.getEvents(),
+        DataService.getStudents(),
+        DataService.getBalances(),
+      ])
+      setEvents(eventsData ?? [])
+      setStudents(studentsData ?? [])
+      setBalances(balancesData ?? [])
+    } catch (loadError) {
+      const message =
+        loadError instanceof Error ? loadError.message : 'Unbekannter Fehler'
+      console.log('Admin-Daten laden fehlgeschlagen', loadError)
+      setError(message)
+    } finally {
+      if (showLoading) setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
     let isActive = true
-
-    const fetchJson = async <T,>(path: string): Promise<T> => {
-      const response = await fetch(`${API_BASE_URL}${path}`, {
-        headers: {
-          ...(ACCESS_KEY ? { 'x-access-key': ACCESS_KEY } : {}),
-        },
-      })
-      if (!response.ok) {
-        const text = await response.text()
-        throw new Error(text || `Request failed with status ${response.status}`)
-      }
-      return response.json() as Promise<T>
+    const run = async () => {
+      if (!isActive) return
+      await loadData()
     }
-
-    const loadData = async () => {
-      setIsLoading(true)
-      setError(null)
-      try {
-        const [eventsData, studentsData, balancesData] = await Promise.all([
-          CorrectionService.listEvents(),
-          fetchJson<Student[]>('/students'),
-          fetchJson<Balance[]>('/students/balance'),
-        ])
-
-        if (!isActive) return
-        setEvents(eventsData ?? [])
-        setStudents(studentsData ?? [])
-        setBalances(balancesData ?? [])
-      } catch (loadError) {
-        if (!isActive) return
-        const message =
-          loadError instanceof Error ? loadError.message : 'Unbekannter Fehler'
-        setError(message)
-      } finally {
-        if (isActive) setIsLoading(false)
-      }
-    }
-
-    loadData()
-
+    run()
     return () => {
       isActive = false
     }
@@ -97,32 +81,44 @@ export default function AdminDashboard() {
 
   const handleNeutralize = async (event: EventRecord, eventKey: string) => {
     const reason = reasons[eventKey]?.trim()
-    if (!reason) return
+    if (!reason) {
+      const message = 'Bitte eine Begründung für die Korrektur angeben.'
+      setError(message)
+      console.log(message)
+      return
+    }
+
+    if (!isAdminAccessKeyActive()) {
+      const message = 'Aktion erfordert ADMIN_KEY_123 im Access Key.'
+      setError(message)
+      console.log(message)
+      return
+    }
 
     setBusyKey(eventKey)
     setError(null)
     try {
-      await CorrectionService.createCorrection({
+      await DataService.createCorrection({
         studentId: event.studentId,
         begruendung: reason,
         anzahl: -event.anzahl,
       })
 
       setReasons((prev) => ({ ...prev, [eventKey]: '' }))
-      const refreshed = await CorrectionService.listEvents()
-      setEvents(refreshed ?? [])
+      await loadData(false)
     } catch (actionError) {
       const message =
         actionError instanceof Error ? actionError.message : 'Unbekannter Fehler'
+      console.log('Korrektur fehlgeschlagen', actionError)
       setError(message)
     } finally {
       setBusyKey(null)
     }
   }
 
-  const accessKeyHint = ACCESS_KEY
+  const accessKeyHint = getRequestAccessKey()
     ? null
-    : 'Hinweis: VITE_ACCESS_KEY ist nicht gesetzt. Admin-Endpunkte sind geschützt.'
+    : 'Hinweis: Access Key ist nicht gesetzt. Admin-Endpunkte sind geschützt.'
 
   const handleRoleChange = (studentId: string, role: UserRole) => {
     const nextAssignments: RoleAssignments = {
@@ -131,6 +127,29 @@ export default function AdminDashboard() {
     }
     setRoleAssignmentsState(nextAssignments)
     setRoleAssignments(nextAssignments)
+  }
+
+  const handleSeed = async () => {
+    if (!isAdminAccessKeyActive()) {
+      const message = 'Beispieldaten erfordern ADMIN_KEY_123 im Access Key.'
+      setSeedError(message)
+      console.log(message)
+      return
+    }
+    setSeedError(null)
+    setSeedMessage(null)
+    setIsSeeding(true)
+    try {
+      await SeedService.seedSampleData()
+      setSeedMessage('Beispieldaten erfolgreich in InfluxDB geladen.')
+      await loadData(false)
+    } catch (seedErr) {
+      const message = seedErr instanceof Error ? seedErr.message : 'Seed fehlgeschlagen'
+      console.log('Seed fehlgeschlagen', seedErr)
+      setSeedError(message)
+    } finally {
+      setIsSeeding(false)
+    }
   }
 
   return (
@@ -144,6 +163,13 @@ export default function AdminDashboard() {
         </p>
         {accessKeyHint ? <div className="admin-warning">{accessKeyHint}</div> : null}
         {error ? <div className="admin-warning">{error}</div> : null}
+        {seedMessage ? <div className="status-toast">{seedMessage}</div> : null}
+        {seedError ? <div className="status-toast error">{seedError}</div> : null}
+        {isLoading ? (
+          <div className="loading-state">
+            <span className="spinner" aria-hidden="true" /> Lädt Admin-Daten…
+          </div>
+        ) : null}
         <div className="admin-layout">
           <aside className="admin-sidebar">
             <div className="admin-sidebar-title">Admin</div>
@@ -167,6 +193,22 @@ export default function AdminDashboard() {
                   Gesamtbilanz: {totalBalance} Striche
                 </span>
               </div>
+              {role === 'Admin' ? (
+                <div className="admin-seed">
+                  <div className="admin-warning">
+                    Achtung: Das Seed lädt unveränderliche Events. Mehrfaches Ausführen
+                    erzeugt Duplikate.
+                  </div>
+                  <button
+                    className="button secondary"
+                    type="button"
+                    onClick={handleSeed}
+                    disabled={isSeeding}
+                  >
+                    {isSeeding ? 'Beispieldaten werden geladen…' : 'System mit Beispieldaten füllen'}
+                  </button>
+                </div>
+              ) : null}
               <div className="cards">
                 <div className="card">
                   <h3>Events gesamt</h3>
@@ -220,15 +262,7 @@ export default function AdminDashboard() {
               </div>
               <UserCreationForm
                 onCreated={async () => {
-                  const response = await fetch(`${API_BASE_URL}/students`, {
-                    headers: {
-                      ...(ACCESS_KEY ? { 'x-access-key': ACCESS_KEY } : {}),
-                    },
-                  })
-                  if (response.ok) {
-                    const data = (await response.json()) as Student[]
-                    setStudents(data)
-                  }
+                  await loadData(false)
                 }}
               />
             </section>

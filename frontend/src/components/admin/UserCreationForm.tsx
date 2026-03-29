@@ -1,11 +1,10 @@
 import { FormEvent, useState } from 'react'
+import { DataService } from '../../services/DataService'
+import { isAdminAccessKeyActive } from '../../auth/roles'
 
 type UserCreationFormProps = {
   onCreated?: () => void
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
-const ACCESS_KEY = import.meta.env.VITE_ACCESS_KEY ?? ''
 
 export default function UserCreationForm({ onCreated }: UserCreationFormProps) {
   const [name, setName] = useState('')
@@ -21,6 +20,13 @@ export default function UserCreationForm({ onCreated }: UserCreationFormProps) {
     setError(null)
     setSuccess(null)
 
+    if (!isAdminAccessKeyActive()) {
+      const message = 'Aktion erfordert ADMIN_KEY_123 im Access Key.'
+      setError(message)
+      console.log(message)
+      return
+    }
+
     if (!name.trim()) {
       setError('Bitte einen Namen angeben.')
       return
@@ -33,21 +39,7 @@ export default function UserCreationForm({ onCreated }: UserCreationFormProps) {
         ...(kurs.trim() ? { kurs: kurs.trim() } : {}),
       }
 
-      const response = await fetch(`${API_BASE_URL}/students`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(ACCESS_KEY ? { 'x-access-key': ACCESS_KEY } : {}),
-        },
-        body: JSON.stringify(payload),
-      })
-
-      if (!response.ok) {
-        const text = await response.text()
-        throw new Error(text || `Request failed with status ${response.status}`)
-      }
-
-      const created = (await response.json()) as { studentId: string; name: string; kurs?: string }
+      const created = await DataService.createStudent(payload)
       setSuccess(`Student wurde angelegt (ID: ${created.studentId}).`)
       setName('')
       setKurs('')
@@ -55,6 +47,7 @@ export default function UserCreationForm({ onCreated }: UserCreationFormProps) {
     } catch (submitError) {
       const message =
         submitError instanceof Error ? submitError.message : 'Unbekannter Fehler'
+      console.log('Student anlegen fehlgeschlagen', submitError)
       setError(message)
     } finally {
       setIsSubmitting(false)

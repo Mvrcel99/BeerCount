@@ -173,12 +173,104 @@ header {
   border-bottom-color: var(--farbe-akzent);
 }
 
+.admin-link {
+  color: var(--farbe-akzent-hover);
+  font-weight: 600;
+}
+
 .nav-button {
   background: none;
   border: none;
   font: inherit;
   color: inherit;
   cursor: pointer;
+}
+
+.role-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--abstand-3);
+}
+
+.access-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.access-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(280px, 80vw);
+  padding: var(--abstand-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--farbe-rahmen);
+  background: var(--farbe-oberflaeche);
+  box-shadow: var(--schatten-md);
+  display: grid;
+  gap: var(--abstand-3);
+  z-index: 30;
+}
+
+.access-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--farbe-text);
+}
+
+.access-toast {
+  position: sticky;
+  top: var(--abstand-2);
+  margin: 0 auto;
+  width: fit-content;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: var(--schatten-sm);
+}
+
+.status-toast {
+  margin-bottom: var(--abstand-3);
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: #e0f2fe;
+  color: #075985;
+  border: 1px solid #bae6fd;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.status-toast.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.loading-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  color: var(--farbe-text-sekundaer);
+  font-weight: 600;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+  border-top-color: var(--farbe-akzent);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .role-badge {
@@ -551,6 +643,12 @@ header {
   margin-bottom: var(--abstand-3);
 }
 
+.admin-seed {
+  display: grid;
+  gap: var(--abstand-2);
+  margin-bottom: var(--abstand-4);
+}
+
 @media (max-width: 900px) {
   .admin-layout {
     grid-template-columns: 1fr;
@@ -567,7 +665,7 @@ header {
     align-items: flex-start;
   }
 
-  .role-badge {
+  .role-cluster {
     align-self: flex-start;
   }
 }

@@ -1,20 +1,23 @@
 import { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { useAdminAccess } from '../auth/adminAccess'
+import { useRole } from '../auth/useRole'
+import type { UserRole } from '../auth/roles'
 
 type ProtectedRouteProps = {
+  allowedRoles?: UserRole[]
   redirectTo?: string
   children: ReactNode
 }
 
 export default function ProtectedRoute({
+  allowedRoles = ['Admin'],
   redirectTo = '/dashboard',
   children,
 }: ProtectedRouteProps) {
   const location = useLocation()
-  const hasAccess = useAdminAccess()
+  const role = useRole()
 
-  if (!hasAccess) {
+  if (!allowedRoles.includes(role)) {
     return <Navigate to={redirectTo} replace state={{ from: location.pathname }} />
   }
 

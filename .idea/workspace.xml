@@ -8,11 +8,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e65fef9f-1fef-47fb-9341-dde8f81fae08" name="Changes" comment="frontend">
+      <change afterPath="$PROJECT_DIR$/frontend/src/services/DataService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/auth/adminAccess.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/auth/roles.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/auth/roles.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Impressum.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Impressum.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProtectedRoute.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProtectedRoute.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/UserCreationForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/UserCreationForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Events.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Events.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/CorrectionService.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/styles/global.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/styles/global.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/utils/berechnungen.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/utils/berechnungen.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,7 +31,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="69" />
+    <option name="cachedIndexableFilesCount" value="82" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
@@ -101,7 +112,7 @@
       <workItem from="1772698468797" duration="82000" />
       <workItem from="1773242266440" duration="614000" />
       <workItem from="1774731046026" duration="1339000" />
-      <workItem from="1774810547969" duration="3791000" />
+      <workItem from="1774810547969" duration="7858000" />
     </task>
     <task id="LOCAL-00001" summary="frontend angelegt">
       <option name="closed" value="true" />
@@ -151,11 +162,30 @@
       <option name="project" value="LOCAL" />
       <updated>1772698497698</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="frontend">
+      <option name="closed" value="true" />
+      <created>1774816723475</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1774816723475</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="frontend angelegt" />
