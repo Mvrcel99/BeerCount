@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useRole } from '../auth/useRole'
 import type { UserRole } from '../auth/roles'
