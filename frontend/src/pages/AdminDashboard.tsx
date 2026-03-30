@@ -18,17 +18,35 @@ import {
 import { useRole } from '../auth/useRole'
 import { SeedService } from '../services/SeedService'
 
+type EditDraft = {
+  studentId: string
+  vorlesung: string
+  typ: 'plus' | 'minus'
+  anzahl: string
+  begruendung: string
+  correctionReason: string
+}
+
+const MINUS_VORLESUNG = 'Bier-Ausgabe'
+
+const buildEventKey = (event: EventRecord) =>
+  `${event.timestamp}-${event.studentId}-${event.vorlesung}-${event.anzahl}-${event.begruendung}`
+
 export default function AdminDashboard() {
   const [events, setEvents] = useState<EventRecord[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [balances, setBalances] = useState<Balance[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [reasons, setReasons] = useState<Record<string, string>>({})
   const [busyKey, setBusyKey] = useState<string | null>(null)
   const [seedMessage, setSeedMessage] = useState<string | null>(null)
   const [seedError, setSeedError] = useState<string | null>(null)
   const [isSeeding, setIsSeeding] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<EventRecord | null>(null)
+  const [deleteReason, setDeleteReason] = useState('')
+  const [editTarget, setEditTarget] = useState<EventRecord | null>(null)
+  const [editDraft, setEditDraft] = useState<EditDraft | null>(null)
+  const [neutralizedKeys, setNeutralizedKeys] = useState<Set<string>>(new Set())
   const role = useRole()
   const [roleAssignments, setRoleAssignmentsState] = useState<RoleAssignments>(() =>
     getRoleAssignments(),
@@ -79,15 +97,31 @@ export default function AdminDashboard() {
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   )
 
-  const handleNeutralize = async (event: EventRecord, eventKey: string) => {
-    const reason = reasons[eventKey]?.trim()
+  const closeDeleteModal = () => {
+    setDeleteTarget(null)
+    setDeleteReason('')
+  }
+
+  const closeEditModal = () => {
+    setEditTarget(null)
+    setEditDraft(null)
+  }
+
+  const parseAmount = (value: string) => {
+    const parsed = Math.trunc(Number(value))
+    if (!Number.isFinite(parsed) || parsed < 1) return null
+    return parsed
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return
+    const reason = deleteReason.trim()
     if (!reason) {
-      const message = 'Bitte eine Begründung für die Korrektur angeben.'
+      const message = 'Bitte eine Begründung der Löschung angeben.'
       setError(message)
       console.log(message)
       return
     }
-
     if (!isAdminAccessKeyActive()) {
       const message = 'Aktion erfordert ADMIN_KEY_123 im Access Key.'
       setError(message)
@@ -95,21 +129,116 @@ export default function AdminDashboard() {
       return
     }
 
-    setBusyKey(eventKey)
+    setBusyKey('delete')
     setError(null)
     try {
       await DataService.createCorrection({
-        studentId: event.studentId,
+        studentId: deleteTarget.studentId,
         begruendung: reason,
-        anzahl: -event.anzahl,
+        anzahl: -deleteTarget.anzahl,
       })
-
-      setReasons((prev) => ({ ...prev, [eventKey]: '' }))
+      setNeutralizedKeys((prev) => {
+        const next = new Set(prev)
+        next.add(buildEventKey(deleteTarget))
+        return next
+      })
+      closeDeleteModal()
       await loadData(false)
     } catch (actionError) {
       const message =
         actionError instanceof Error ? actionError.message : 'Unbekannter Fehler'
-      console.log('Korrektur fehlgeschlagen', actionError)
+      console.log('Löschung fehlgeschlagen', actionError)
+      setError(message)
+    } finally {
+      setBusyKey(null)
+    }
+  }
+
+  const openEditModal = (event: EventRecord) => {
+    const initial: EditDraft = {
+      studentId: event.studentId,
+      vorlesung: event.typ === 'minus' ? MINUS_VORLESUNG : event.vorlesung,
+      typ: event.typ === 'minus' ? 'minus' : 'plus',
+      anzahl: String(Math.abs(event.anzahl)),
+      begruendung: event.begruendung,
+      correctionReason: '',
+    }
+    setEditTarget(event)
+    setEditDraft(initial)
+  }
+
+  const handleEditConfirm = async () => {
+    if (!editTarget || !editDraft) return
+    const amount = parseAmount(editDraft.anzahl)
+    if (!amount) {
+      const message = 'Bitte eine gültige Anzahl angeben.'
+      setError(message)
+      console.log(message)
+      return
+    }
+    if (!editDraft.begruendung.trim()) {
+      const message = 'Bitte eine Begründung für das neue Event angeben.'
+      setError(message)
+      console.log(message)
+      return
+    }
+    if (editDraft.typ === 'plus' && !editDraft.vorlesung.trim()) {
+      const message = 'Bitte eine Vorlesung angeben.'
+      setError(message)
+      console.log(message)
+      return
+    }
+    if (!editDraft.correctionReason.trim()) {
+      const message = 'Bitte eine Begründung der Korrektur angeben.'
+      setError(message)
+      console.log(message)
+      return
+    }
+    if (!isAdminAccessKeyActive()) {
+      const message = 'Aktion erfordert ADMIN_KEY_123 im Access Key.'
+      setError(message)
+      console.log(message)
+      return
+    }
+
+    setBusyKey('edit')
+    setError(null)
+    try {
+      await DataService.createCorrection({
+        studentId: editTarget.studentId,
+        begruendung: editDraft.correctionReason.trim(),
+        anzahl: -editTarget.anzahl,
+      })
+
+      if (editDraft.typ === 'minus') {
+        for (let i = 0; i < amount; i += 1) {
+          await DataService.createMinus({
+            studentId: editDraft.studentId,
+            begruendung: editDraft.begruendung.trim(),
+          })
+        }
+      } else {
+        for (let i = 0; i < amount; i += 1) {
+          await DataService.createEvent({
+            studentId: editDraft.studentId,
+            vorlesung: editDraft.vorlesung.trim(),
+            begruendung: editDraft.begruendung.trim(),
+            typ: 'plus',
+          })
+        }
+      }
+
+      setNeutralizedKeys((prev) => {
+        const next = new Set(prev)
+        next.add(buildEventKey(editTarget))
+        return next
+      })
+      closeEditModal()
+      await loadData(false)
+    } catch (actionError) {
+      const message =
+        actionError instanceof Error ? actionError.message : 'Unbekannter Fehler'
+      console.log('Bearbeitung fehlgeschlagen', actionError)
       setError(message)
     } finally {
       setBusyKey(null)
@@ -177,8 +306,7 @@ export default function AdminDashboard() {
               <a href="#admin-overview">Systemübersicht</a>
               <a href="#admin-users">User-Verwaltung</a>
               <a href="#admin-roles">Rollen</a>
-              <a href="#admin-corrections">Korrekturen</a>
-              <a href="#admin-log">Systemlog</a>
+              <a href="#admin-events">Events</a>
             </nav>
             <div className="admin-helper">
               {isLoading ? 'Daten werden geladen…' : `${students.length} Nutzer`}
@@ -313,11 +441,11 @@ export default function AdminDashboard() {
               </div>
             </section>
 
-            <section id="admin-corrections" className="admin-section">
+            <section id="admin-events" className="admin-section">
               <div className="admin-section-header">
-                <h2 className="section-title">Korrekturen</h2>
+                <h2 className="section-title">Events</h2>
                 <span className="admin-helper">
-                  Jede Korrektur erzeugt eine Korrekturbuchung.
+                  Bearbeiten und Löschen erzeugen Korrektur-Events.
                 </span>
               </div>
               <div className="card admin-table">
@@ -330,13 +458,13 @@ export default function AdminDashboard() {
                       <th scope="col">Typ</th>
                       <th scope="col">Anzahl</th>
                       <th scope="col">Begründung</th>
-                      <th scope="col">Korrektur</th>
+                      <th scope="col">Aktionen</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedEvents.map((event, index) => {
+                    {sortedEvents.map((event) => {
                       const student = studentById.get(event.studentId)
-                      const eventKey = `${event.timestamp}-${event.studentId}-${index}`
+                      const eventKey = buildEventKey(event)
                       const isCorrection =
                         event.typ === 'correction' || event.typ === 'korrektur'
                       const typLabel = isCorrection
@@ -344,9 +472,12 @@ export default function AdminDashboard() {
                         : event.typ === 'minus'
                           ? 'Minus-Event'
                           : 'Plus-Event'
-
+                      const isNeutralized = neutralizedKeys.has(eventKey)
                       return (
-                        <tr key={eventKey}>
+                        <tr
+                          key={eventKey}
+                          className={isNeutralized ? 'event-row neutralized' : undefined}
+                        >
                           <td>{event.timestamp}</td>
                           <td>{student?.name ?? event.studentId}</td>
                           <td>{event.vorlesung}</td>
@@ -367,39 +498,27 @@ export default function AdminDashboard() {
                           <td>{event.anzahl}</td>
                           <td>{event.begruendung}</td>
                           <td>
-                            {isCorrection ? (
-                              <span className="admin-helper">—</span>
-                            ) : (
-                              <div className="form-inline">
-                                <label htmlFor={`reason-${eventKey}`}>Begründung</label>
-                                <input
-                                  id={`reason-${eventKey}`}
-                                  className="input"
-                                  type="text"
-                                  value={reasons[eventKey] ?? ''}
-                                  onChange={(inputEvent) =>
-                                    setReasons((prev) => ({
-                                      ...prev,
-                                      [eventKey]: inputEvent.target.value,
-                                    }))
-                                  }
-                                  placeholder="z.B. falsch erfasst"
-                                  required
-                                />
-                                <button
-                                  className="button secondary"
-                                  type="button"
-                                  disabled={
-                                    busyKey === eventKey || !reasons[eventKey]?.trim()
-                                  }
-                                  onClick={() => handleNeutralize(event, eventKey)}
-                                >
-                                  {busyKey === eventKey
-                                    ? 'Korrigiert…'
-                                    : 'Korrektur'}
-                                </button>
-                              </div>
-                            )}
+                            <div className="inline-actions">
+                              <button
+                                className="button secondary"
+                                type="button"
+                                disabled={isCorrection || isNeutralized || busyKey !== null}
+                                onClick={() => openEditModal(event)}
+                              >
+                                Bearbeiten
+                              </button>
+                              <button
+                                className="button danger"
+                                type="button"
+                                disabled={isCorrection || isNeutralized || busyKey !== null}
+                                onClick={() => {
+                                  setDeleteTarget(event)
+                                  setDeleteReason('')
+                                }}
+                              >
+                                Löschen
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       )
@@ -408,42 +527,193 @@ export default function AdminDashboard() {
                 </table>
               </div>
             </section>
-
-            <section id="admin-log" className="admin-section">
-              <div className="admin-section-header">
-                <h2 className="section-title">Systemlog</h2>
-                <span className="admin-helper">Alle Aktivitäten in Echtzeit.</span>
-              </div>
-              <div className="event-list">
-                {sortedEvents.slice(0, 15).map((event, index) => {
-                  const student = studentById.get(event.studentId)
-                  const logKey = `${event.timestamp}-${event.studentId}-log-${index}`
-                  const isCorrection =
-                    event.typ === 'correction' || event.typ === 'korrektur'
-                  const typLabel = isCorrection
-                    ? 'Korrekturbuchung'
-                    : event.typ === 'minus'
-                      ? 'Minus-Event'
-                      : 'Plus-Event'
-                  return (
-                    <article key={logKey} className="event-item">
-                      <div>
-                        <div className="event-meta">{event.timestamp}</div>
-                        <h3 className="event-title">{student?.name ?? event.studentId}</h3>
-                        <p className="event-detail">{event.begruendung}</p>
-                      </div>
-                      <div className="event-values">
-                        <span className="event-typ">{typLabel}</span>
-                        <span className="event-anzahl">{event.anzahl}</span>
-                      </div>
-                    </article>
-                  )
-                })}
-              </div>
-            </section>
           </div>
         </div>
       </div>
+      {deleteTarget ? (
+        <div className="modal-backdrop" role="presentation">
+          <div className="modal" role="dialog" aria-modal="true" aria-label="Event löschen">
+            <div className="modal-header">
+              <h3>Event löschen</h3>
+              <button className="button secondary" type="button" onClick={closeDeleteModal}>
+                Schließen
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="admin-helper">
+                Die Löschung erzeugt eine Korrekturbuchung mit entgegengesetztem Wert.
+              </p>
+              <div className="form-grid">
+                <div className="form-field">
+                  <label htmlFor="delete-reason">Begründung der Löschung</label>
+                  <textarea
+                    id="delete-reason"
+                    className="textarea"
+                    value={deleteReason}
+                    onChange={(event) => setDeleteReason(event.target.value)}
+                    placeholder="z.B. Event wurde doppelt erfasst"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="button secondary"
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={busyKey === 'delete'}
+              >
+                Abbrechen
+              </button>
+              <button
+                className="button danger"
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={busyKey === 'delete' || !deleteReason.trim()}
+              >
+                {busyKey === 'delete' ? 'Lösche…' : 'Löschen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {editTarget && editDraft ? (
+        <div className="modal-backdrop" role="presentation">
+          <div className="modal" role="dialog" aria-modal="true" aria-label="Event bearbeiten">
+            <div className="modal-header">
+              <h3>Event bearbeiten</h3>
+              <button className="button secondary" type="button" onClick={closeEditModal}>
+                Schließen
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-grid">
+                <div className="form-field">
+                  <label htmlFor="edit-student">Student</label>
+                  <select
+                    id="edit-student"
+                    className="select"
+                    value={editDraft.studentId}
+                    onChange={(event) =>
+                      setEditDraft((prev) =>
+                        prev ? { ...prev, studentId: event.target.value } : prev,
+                      )
+                    }
+                  >
+                    {students.map((student) => (
+                      <option key={student.studentId} value={student.studentId}>
+                        {student.name} ({student.studentId})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="edit-type">Typ</label>
+                  <select
+                    id="edit-type"
+                    className="select"
+                    value={editDraft.typ}
+                    onChange={(event) =>
+                      setEditDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              typ: event.target.value as 'plus' | 'minus',
+                              vorlesung:
+                                event.target.value === 'minus'
+                                  ? MINUS_VORLESUNG
+                                  : prev.vorlesung,
+                            }
+                          : prev,
+                      )
+                    }
+                  >
+                    <option value="plus">Plus-Event</option>
+                    <option value="minus">Minus-Event</option>
+                  </select>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="edit-lecture">Vorlesung</label>
+                  <input
+                    id="edit-lecture"
+                    className="input"
+                    type="text"
+                    value={editDraft.typ === 'minus' ? MINUS_VORLESUNG : editDraft.vorlesung}
+                    onChange={(event) =>
+                      setEditDraft((prev) =>
+                        prev ? { ...prev, vorlesung: event.target.value } : prev,
+                      )
+                    }
+                    disabled={editDraft.typ === 'minus'}
+                  />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="edit-amount">Anzahl</label>
+                  <input
+                    id="edit-amount"
+                    className="input"
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={editDraft.anzahl}
+                    onChange={(event) =>
+                      setEditDraft((prev) =>
+                        prev ? { ...prev, anzahl: event.target.value } : prev,
+                      )
+                    }
+                  />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="edit-reason">Begründung (neues Event)</label>
+                  <textarea
+                    id="edit-reason"
+                    className="textarea"
+                    value={editDraft.begruendung}
+                    onChange={(event) =>
+                      setEditDraft((prev) =>
+                        prev ? { ...prev, begruendung: event.target.value } : prev,
+                      )
+                    }
+                  />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="edit-correction">Begründung der Korrektur</label>
+                  <textarea
+                    id="edit-correction"
+                    className="textarea"
+                    value={editDraft.correctionReason}
+                    onChange={(event) =>
+                      setEditDraft((prev) =>
+                        prev ? { ...prev, correctionReason: event.target.value } : prev,
+                      )
+                    }
+                    placeholder="z.B. falscher Student"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="button secondary"
+                type="button"
+                onClick={closeEditModal}
+                disabled={busyKey === 'edit'}
+              >
+                Abbrechen
+              </button>
+              <button
+                className="button primary"
+                type="button"
+                onClick={handleEditConfirm}
+                disabled={busyKey === 'edit'}
+              >
+                {busyKey === 'edit' ? 'Speichere…' : 'Speichern'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

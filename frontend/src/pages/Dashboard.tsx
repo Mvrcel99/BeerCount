@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DataService, type Balance } from '../services/DataService'
+import { Refresh } from '../utils/refresh'
 
 export default function Dashboard() {
   const [balances, setBalances] = useState<Balance[]>([])
@@ -8,25 +9,40 @@ export default function Dashboard() {
 
   useEffect(() => {
     let active = true
-    setIsLoading(true)
-    setError(null)
-    DataService.getBalances()
-      .then((data) => {
+    const loadBalances = async (showLoading = true) => {
+      if (!active) return
+      if (showLoading) setIsLoading(true)
+      setError(null)
+      try {
+        const data = await DataService.getBalances()
         if (!active) return
         setBalances(data ?? [])
-      })
-      .catch((loadError) => {
+      } catch (loadError) {
         if (!active) return
         const message =
           loadError instanceof Error ? loadError.message : 'Backend nicht erreichbar'
         setError(message)
-      })
-      .finally(() => {
-        if (active) setIsLoading(false)
-      })
+      } finally {
+        if (active && showLoading) setIsLoading(false)
+      }
+    }
+
+    loadBalances(true)
+
+    const handleRefresh = () => loadBalances(false)
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === Refresh.storageKey) {
+        handleRefresh()
+      }
+    }
+
+    window.addEventListener(Refresh.event, handleRefresh)
+    window.addEventListener('storage', handleStorage)
 
     return () => {
       active = false
+      window.removeEventListener(Refresh.event, handleRefresh)
+      window.removeEventListener('storage', handleStorage)
     }
   }, [])
 

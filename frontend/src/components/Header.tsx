@@ -63,6 +63,14 @@ export default function Header() {
           <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/events">
             Historie
           </NavLink>
+          {role !== 'Student' ? (
+            <NavLink
+              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+              to="/log-event"
+            >
+              {role === 'Kurssprecher' ? 'Störung erfassen' : 'Event erfassen'}
+            </NavLink>
+          ) : null}
           {role === 'Admin' ? (
             <NavLink
               className={({ isActive }) =>

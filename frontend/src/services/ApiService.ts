@@ -29,13 +29,26 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   const url = buildApiUrl(path)
   console.log(`Calling: ${url}`)
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...buildHeaders(method !== 'GET'),
-      ...options.headers,
-    },
-  })
+  let response: Response
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        ...buildHeaders(method !== 'GET'),
+        ...options.headers,
+      },
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    if (
+      message.includes('ECONNREFUSED') ||
+      message.includes('Failed to fetch') ||
+      message.includes('NetworkError')
+    ) {
+      throw new Error('Datenbankverbindung fehlgeschlagen')
+    }
+    throw error instanceof Error ? error : new Error('Unbekannter Fehler')
+  }
 
   if (!response.ok) {
     const text = await response.text()

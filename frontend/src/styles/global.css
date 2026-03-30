@@ -117,6 +117,17 @@ img {
   color: var(--farbe-akzent-hover);
 }
 
+.button.danger {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.button.danger:hover {
+  background: #fecaca;
+  color: #7f1d1d;
+}
+
 header {
   padding: var(--abstand-6) 0 var(--abstand-4);
 }
@@ -618,6 +629,11 @@ header {
   border-color: #bbf7d0;
 }
 
+.event-row.neutralized {
+  color: var(--farbe-text-sekundaer);
+  text-decoration: line-through;
+}
+
 .admin-table {
   overflow-x: auto;
 }
@@ -632,6 +648,90 @@ header {
   color: var(--farbe-text-sekundaer);
 }
 
+.event-toggle {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--abstand-2);
+}
+
+.event-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--abstand-2);
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--farbe-rahmen);
+  background: var(--farbe-oberflaeche);
+  color: var(--farbe-text-sekundaer);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.event-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.event-option.plus:hover {
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.event-option.minus:hover {
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.event-option.plus.active {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.event-option.minus.active {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.event-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.event-badge.plus {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.event-badge.minus {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.event-sign {
+  margin-top: 0.35rem;
+  font-weight: 700;
+}
+
+.event-sign.plus {
+  color: #b91c1c;
+}
+
+.event-sign.minus {
+  color: #166534;
+}
+
 .admin-helper {
   color: var(--farbe-text-sekundaer);
   font-size: 0.9rem;
@@ -641,6 +741,50 @@ header {
   color: #b45309;
   font-size: 0.9rem;
   margin-bottom: var(--abstand-3);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--abstand-4);
+  z-index: 80;
+}
+
+.modal {
+  width: min(760px, 95vw);
+  background: var(--farbe-oberflaeche);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--schatten-md);
+  padding: var(--abstand-5);
+  display: grid;
+  gap: var(--abstand-4);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.modal-body {
+  display: grid;
+  gap: var(--abstand-3);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--abstand-2);
 }
 
 .admin-seed {

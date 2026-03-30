@@ -7,6 +7,7 @@ import Events from './pages/Events'
 import Impressum from './pages/Impressum'
 import AdminPanel from './pages/AdminPanel'
 import ProtectedRoute from './components/ProtectedRoute'
+import EventLoggingPage from './pages/EventLoggingPage'
 
 function App() {
   return (
@@ -18,6 +19,14 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/events" element={<Events />} />
+            <Route
+              path="/log-event"
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Kurssprecher']}>
+                  <EventLoggingPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin"
               element={

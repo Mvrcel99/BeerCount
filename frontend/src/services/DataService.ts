@@ -31,6 +31,11 @@ export type CreateEventInput = {
   typ?: EventType
 }
 
+export type CreateMinusInput = {
+  studentId: string
+  begruendung: string
+}
+
 export type CreateCorrectionInput = {
   studentId: string
   begruendung: string
@@ -51,6 +56,11 @@ export const DataService = {
     ),
   createEvent: (input: CreateEventInput) =>
     request<{ message: string; timestamp?: string }>('/events', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+  createMinus: (input: CreateMinusInput) =>
+    request<{ message: string; timestamp?: string }>('/events/minus', {
       method: 'POST',
       body: JSON.stringify(input),
     }),
