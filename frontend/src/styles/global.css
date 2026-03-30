@@ -621,14 +621,28 @@ header {
 }
 
 .filter-bar {
-  display: grid;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
   gap: var(--abstand-4);
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   margin-bottom: var(--abstand-6);
 }
 
 .filter-bar .form-field {
   margin: 0;
+  flex: 1 1 220px;
+  min-width: 220px;
+}
+
+.filter-bar .filter-reset {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.filter-reset-button {
+  height: 42px;
+  padding: 0.5rem 1rem;
 }
 
 .visually-hidden {

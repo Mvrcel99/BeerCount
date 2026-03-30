@@ -174,13 +174,13 @@ export default function Events() {
               onChange={(event) => setDateTo(event.target.value)}
             />
           </div>
-          <div className="form-field">
+          <div className="form-field filter-reset">
             <label className="visually-hidden" htmlFor="filter-reset">
               Filter zurücksetzen
             </label>
             <button
               id="filter-reset"
-              className="button secondary"
+              className="button secondary filter-reset-button"
               type="button"
               onClick={() => {
                 setSelectedStudentId('')
