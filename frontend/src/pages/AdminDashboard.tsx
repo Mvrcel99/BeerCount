@@ -389,7 +389,7 @@ export default function AdminDashboard() {
                     onClick={handleSeed}
                     disabled={isSeeding}
                   >
-                    {isSeeding ? 'Beispieldaten werden geladen…' : 'System mit Beispieldaten füllen'}
+                    {isSeeding ? 'Beispieldaten werden geladen…' : 'Beispielevents zu den angelegten Studenten erzeugen'}
                   </button>
                 </div>
               ) : null}
@@ -431,7 +431,7 @@ export default function AdminDashboard() {
                       const rowClass = rank <= 3 ? `leaderboard top-${rank}` : 'leaderboard'
                       return (
                         <tr key={balance.studentId} className={rowClass}>
-                          <td>{rank === 1 ? '👑 1' : rank}</td>
+                          <td>{rank === 1 ? '1' : rank}</td>
                           <td>{formatUmlauts(balance.name)}</td>
                           <td>{formatUmlauts(balance.kurs ?? '—')}</td>
                           <td>{balance.striche}</td>
@@ -446,9 +446,6 @@ export default function AdminDashboard() {
             <section id="admin-users" className="admin-section">
               <div className="admin-section-header">
                 <h2 className="section-title">User-Verwaltung</h2>
-                <span className="admin-helper">
-                  Neue Studenten werden als eigener Datensatz angelegt.
-                </span>
               </div>
               <UserCreationForm
                 onCreated={async () => {
@@ -496,9 +493,6 @@ export default function AdminDashboard() {
             <section id="admin-roles" className="admin-section">
               <div className="admin-section-header">
                 <h2 className="section-title">Rollen & Rechte</h2>
-                <span className="admin-helper">
-                  Rollenverwaltung wird lokal gespeichert, Backend-Schnittstelle fehlt.
-                </span>
               </div>
               <div className="card">
                 <table className="data-table" aria-label="Rollen zuweisen">
