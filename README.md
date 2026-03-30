@@ -19,7 +19,7 @@ docker-compose up -d
 
 ```
 
-*Das InfluxDB-Dashboard ist nun unter `http://locnalhost:8086` erreichbar (Login: admin / biercounter123).*
+*Das InfluxDB-Dashboard ist nun unter `http://localhost:8086` erreichbar (Login: admin / biercounter123).*
 
 ### 2. Backend-Abhängigkeiten installieren
 

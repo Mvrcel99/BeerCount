@@ -75,6 +75,7 @@ export class EventsService {
         |> range(start: 0)
         |> filter(fn: (r) => r._measurement == "bier_event")
         ${filter}
+        |> map(fn: (r) => ({ r with studentId: if exists r.studentId then r.studentId else "" }))
         |> pivot(rowKey: ["_time", "studentId", "vorlesung", "typ"], columnKey: ["_field"], valueColumn: "_value")
         |> sort(columns: ["_time"], desc: true)
     `;
