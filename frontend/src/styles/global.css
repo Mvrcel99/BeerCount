@@ -410,6 +410,33 @@ header {
   font-weight: 600;
 }
 
+.data-table tbody tr td {
+  padding-top: var(--abstand-3);
+  padding-bottom: var(--abstand-3);
+}
+
+.leaderboard td {
+  font-weight: 500;
+}
+
+.leaderboard.top-1 {
+  background: #fff7ed;
+}
+
+.leaderboard.top-2 {
+  background: #f1f5f9;
+}
+
+.leaderboard.top-3 {
+  background: #f8fafc;
+}
+
+.leaderboard.top-1 td,
+.leaderboard.top-2 td,
+.leaderboard.top-3 td {
+  font-weight: 600;
+}
+
 .meta-hint {
   margin-top: var(--abstand-3);
   color: var(--farbe-text-sekundaer);
@@ -430,6 +457,11 @@ header {
   border-radius: var(--radius-md);
   background: var(--farbe-oberflaeche);
   box-shadow: var(--schatten-sm);
+}
+
+.event-item.minus {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
 }
 
 .event-title {
@@ -501,6 +533,15 @@ header {
   border-color: #e2e8f0;
 }
 
+.admin-shell {
+  padding: var(--abstand-6) 0;
+}
+
+.admin-shell .container {
+  display: grid;
+  gap: var(--abstand-5);
+}
+
 .admin-layout {
   display: grid;
   grid-template-columns: minmax(220px, 260px) 1fr;
@@ -544,7 +585,7 @@ header {
 
 .admin-main {
   display: grid;
-  gap: var(--abstand-5);
+  gap: var(--abstand-6);
 }
 
 .admin-section {
@@ -553,6 +594,10 @@ header {
   border: 1px solid var(--farbe-rahmen);
   background: var(--farbe-oberflaeche);
   box-shadow: var(--schatten-sm);
+}
+
+.admin-section .cards {
+  gap: var(--abstand-5);
 }
 
 .admin-section-header {
@@ -573,6 +618,29 @@ header {
   display: block;
   font-weight: 600;
   margin-bottom: 0.35rem;
+}
+
+.filter-bar {
+  display: grid;
+  gap: var(--abstand-4);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: var(--abstand-6);
+}
+
+.filter-bar .form-field {
+  margin: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .input,
@@ -597,6 +665,7 @@ header {
   gap: var(--abstand-2);
   align-items: center;
   flex-wrap: wrap;
+  margin-top: var(--abstand-2);
 }
 
 .event-tag {
@@ -636,6 +705,12 @@ header {
 
 .admin-table {
   overflow-x: auto;
+  margin-top: var(--abstand-6);
+  padding: var(--abstand-5);
+}
+
+.admin-table .data-table {
+  margin-top: var(--abstand-3);
 }
 
 .form-inline {
@@ -790,7 +865,7 @@ header {
 .admin-seed {
   display: grid;
   gap: var(--abstand-2);
-  margin-bottom: var(--abstand-4);
+  margin-bottom: var(--abstand-5);
 }
 
 @media (max-width: 900px) {

@@ -47,12 +47,31 @@ export default function EventLoggingPage() {
 
   const isKurssprecher = role === 'Kurssprecher'
   const isAdmin = role === 'Admin'
+  const canChooseEventType = role === 'Admin' || role === 'Kurssprecher'
+  const isStudent = role === 'Student'
   const hasStudents = students.length > 0
 
   useEffect(() => {
-    if (isAdmin) return
+    if (canChooseEventType) return
     setEventType('plus')
-  }, [isAdmin, isKurssprecher])
+  }, [canChooseEventType])
+
+  useEffect(() => {
+    if (eventType === 'plus') {
+      setAnzahl('1')
+    }
+  }, [eventType])
+
+  useEffect(() => {
+    if (!students.length) {
+      setSelectedStudentId('')
+      return
+    }
+    const exists = students.some((student) => student.studentId === selectedStudentId)
+    if (!exists) {
+      setSelectedStudentId(students[0].studentId)
+    }
+  }, [students, selectedStudentId])
 
   useEffect(() => {
     if (eventType === 'minus') return
@@ -70,29 +89,44 @@ export default function EventLoggingPage() {
 
   useEffect(() => {
     let active = true
-    setIsLoading(true)
-    setError(null)
-    DataService.getStudents()
-      .then((data) => {
+    const loadStudents = async (showLoading = true) => {
+      if (!active) return
+      if (showLoading) setIsLoading(true)
+      setError(null)
+      try {
+        const data = await DataService.getStudents()
         if (!active) return
         const list = data ?? []
         setStudents(list)
         if (list.length > 0) {
           setSelectedStudentId((prev) => prev || list[0].studentId)
         }
-      })
-      .catch((loadError) => {
+      } catch (loadError) {
         if (!active) return
         const message =
           loadError instanceof Error ? loadError.message : 'Backend nicht erreichbar'
         setError(message)
-      })
-      .finally(() => {
-        if (active) setIsLoading(false)
-      })
+      } finally {
+        if (active && showLoading) setIsLoading(false)
+      }
+    }
+
+    loadStudents(true)
+
+    const handleRefresh = () => loadStudents(false)
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === Refresh.storageKey) {
+        handleRefresh()
+      }
+    }
+
+    window.addEventListener(Refresh.event, handleRefresh)
+    window.addEventListener('storage', handleStorage)
 
     return () => {
       active = false
+      window.removeEventListener(Refresh.event, handleRefresh)
+      window.removeEventListener('storage', handleStorage)
     }
   }, [])
 
@@ -112,7 +146,7 @@ export default function EventLoggingPage() {
     setBegruendung('')
     setAnzahl('1')
     setCustomLecture('')
-    if (!isAdmin) {
+    if (!canChooseEventType) {
       setEventType('plus')
     }
     if (lectureOptions.length > 0) {
@@ -150,7 +184,7 @@ export default function EventLoggingPage() {
       return
     }
 
-    const amount = parseAmount()
+    const amount = eventType === 'minus' ? parseAmount() : 1
     if (!amount) {
       setError('Bitte eine gültige Anzahl an Strichen angeben.')
       return
@@ -172,14 +206,12 @@ export default function EventLoggingPage() {
           })
         }
       } else {
-        for (let i = 0; i < amount; i += 1) {
-          await DataService.createEvent({
-            studentId: trimmedStudentId,
-            vorlesung: vorlesungValue.trim(),
-            begruendung: trimmedReason,
-            typ: 'plus',
-          })
-        }
+        await DataService.createEvent({
+          studentId: trimmedStudentId,
+          vorlesung: vorlesungValue.trim(),
+          begruendung: trimmedReason,
+          typ: 'plus',
+        })
       }
       const valueLabel = signedAmount > 0 ? `+${signedAmount}` : `${signedAmount}`
       const toastMessage =
@@ -201,9 +233,9 @@ export default function EventLoggingPage() {
     }
   }
 
-  const parsedAmount = parseAmount()
+  const parsedAmount = eventType === 'minus' ? parseAmount() : 1
   const signedDisplay =
-    parsedAmount !== null ? (eventType === 'minus' ? -parsedAmount : parsedAmount) : null
+    parsedAmount !== null ? (eventType === 'minus' ? -parsedAmount : 1) : null
   const isReasonValid = begruendung.trim().length > 0
   const canSubmit =
     !isSubmitting &&
@@ -211,7 +243,7 @@ export default function EventLoggingPage() {
     isReasonValid &&
     !!selectedStudentId.trim() &&
     !!vorlesungValue.trim() &&
-    parsedAmount !== null
+    (eventType === 'plus' || parsedAmount !== null)
 
   return (
     <section className="page-section">
@@ -221,6 +253,11 @@ export default function EventLoggingPage() {
           Plus-Events (Störungen) und Bier-Ausgaben werden als eigenständige Buchungen
           gespeichert.
         </p>
+        {isStudent ? (
+          <div className="admin-helper">
+            Hier kannst du eine neue Störung für die Liste erfassen.
+          </div>
+        ) : null}
         {error ? <div className="status-toast error">{error}</div> : null}
         {success ? <div className="status-toast">{success}</div> : null}
         {isLoading ? (
@@ -255,7 +292,7 @@ export default function EventLoggingPage() {
 
               <div className="form-field">
                 <label>Event-Typ</label>
-                {isAdmin ? (
+                {canChooseEventType ? (
                   <div className="event-toggle" role="radiogroup" aria-label="Event-Typ">
                     <label
                       className={`event-option plus${eventType === 'plus' ? ' active' : ''}`}
@@ -351,25 +388,41 @@ export default function EventLoggingPage() {
 
               <div className="form-field">
                 <label htmlFor="anzahl-input">Anzahl Striche</label>
-                <input
-                  id="anzahl-input"
-                  className="input"
-                  type="number"
-                  min={1}
-                  step={1}
-                  inputMode="numeric"
-                  value={anzahl}
-                  onChange={(inputEvent) => setAnzahl(inputEvent.target.value)}
-                  required
-                />
+                {eventType === 'minus' ? (
+                  <input
+                    id="anzahl-input"
+                    className="input"
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={anzahl}
+                    onChange={(inputEvent) => setAnzahl(inputEvent.target.value)}
+                    required
+                  />
+                ) : (
+                  <input
+                    id="anzahl-input"
+                    className="input"
+                    type="number"
+                    value="1"
+                    disabled
+                  />
+                )}
                 {signedDisplay !== null ? (
                   <div className={`event-sign ${eventType}`}>
                     Wert: {signedDisplay > 0 ? `+${signedDisplay}` : signedDisplay}
                   </div>
                 ) : null}
-                <div className="admin-helper">
-                  Jeder Strich wird als eigenes Event gespeichert.
-                </div>
+                {eventType === 'minus' ? (
+                  <div className="admin-helper">
+                    Mehrere Striche erzeugen mehrere Buchungen.
+                  </div>
+                ) : (
+                  <div className="admin-helper">
+                    Störungen werden immer mit genau einem Strich gespeichert.
+                  </div>
+                )}
               </div>
 
               <div className="form-field">

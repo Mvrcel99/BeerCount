@@ -22,7 +22,7 @@ function App() {
             <Route
               path="/log-event"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'Kurssprecher']}>
+                <ProtectedRoute allowedRoles={['Admin', 'Kurssprecher', 'Student']}>
                   <EventLoggingPage />
                 </ProtectedRoute>
               }

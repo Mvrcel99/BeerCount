@@ -1,4 +1,5 @@
-import { request } from './ApiService'
+import { deleteStudent as deleteStudentRequest, request } from './ApiService'
+import { getInactiveStudents } from '../utils/inactiveStudents'
 
 export type Student = {
   studentId: string
@@ -48,8 +49,16 @@ export type CreateStudentInput = {
 }
 
 export const DataService = {
-  getStudents: () => request<Student[]>('/students'),
-  getBalances: () => request<Balance[]>('/students/balance'),
+  getStudents: async () => {
+    const data = await request<Student[]>('/students')
+    const inactive = getInactiveStudents()
+    return (data ?? []).filter((student) => !inactive[student.studentId])
+  },
+  getBalances: async () => {
+    const data = await request<Balance[]>('/students/balance')
+    const inactive = getInactiveStudents()
+    return (data ?? []).filter((balance) => !inactive[balance.studentId])
+  },
   getEvents: (studentId?: string) =>
     request<EventRecord[]>(
       `/events${studentId ? `?studentId=${encodeURIComponent(studentId)}` : ''}`,
@@ -81,4 +90,5 @@ export const DataService = {
         ...(input.kurs ? { kurs: input.kurs } : {}),
       }),
     }),
+  deleteStudent: (studentId: string) => deleteStudentRequest(studentId),
 }

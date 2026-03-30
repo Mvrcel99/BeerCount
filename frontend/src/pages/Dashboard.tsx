@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DataService, type Balance } from '../services/DataService'
 import { Refresh } from '../utils/refresh'
 
@@ -6,6 +6,13 @@ export default function Dashboard() {
   const [balances, setBalances] = useState<Balance[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const sortedBalances = useMemo(() => {
+    return [...balances].sort((a, b) => {
+      if (b.striche !== a.striche) return b.striche - a.striche
+      return a.name.localeCompare(b.name, 'de')
+    })
+  }, [balances])
 
   useEffect(() => {
     let active = true
@@ -63,17 +70,23 @@ export default function Dashboard() {
             <table className="data-table" aria-label="Striche pro Student">
               <thead>
                 <tr>
+                  <th scope="col">Rang</th>
                   <th scope="col">Name</th>
                   <th scope="col">Striche</th>
                 </tr>
               </thead>
               <tbody>
-                {balances.map((student) => (
-                  <tr key={student.studentId}>
-                    <td>{student.name}</td>
-                    <td>{student.striche}</td>
-                  </tr>
-                ))}
+                {sortedBalances.map((student, index) => {
+                  const rank = index + 1
+                  const rowClass = rank <= 3 ? `leaderboard top-${rank}` : 'leaderboard'
+                  return (
+                    <tr key={student.studentId} className={rowClass}>
+                      <td>{rank === 1 ? '1' : rank}</td>
+                      <td>{student.name}</td>
+                      <td>{student.striche}</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           )}

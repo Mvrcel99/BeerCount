@@ -7,12 +7,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e65fef9f-1fef-47fb-9341-dde8f81fae08" name="Changes" comment="api-baseurl und admin-seed">
+    <list default="true" id="e65fef9f-1fef-47fb-9341-dde8f81fae08" name="Changes" comment="add event management with correction modals">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Header.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EventLoggingPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/EventLoggingPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/Events.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Events.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/services/ApiService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/ApiService.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/services/DataService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/DataService.ts" afterDir="false" />
@@ -106,7 +107,7 @@
       <workItem from="1773242266440" duration="614000" />
       <workItem from="1774731046026" duration="1339000" />
       <workItem from="1774810547969" duration="8096000" />
-      <workItem from="1774850821958" duration="3873000" />
+      <workItem from="1774850821958" duration="8092000" />
     </task>
     <task id="LOCAL-00001" summary="frontend angelegt">
       <option name="closed" value="true" />
@@ -172,7 +173,23 @@
       <option name="project" value="LOCAL" />
       <updated>1774820893442</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="add event management with correction modals">
+      <option name="closed" value="true" />
+      <created>1774854753508</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1774854753508</updated>
+    </task>
+    <task id="LOCAL-00010" summary="add event management with correction modals">
+      <option name="closed" value="true" />
+      <created>1774854765106</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1774854765106</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -193,6 +210,7 @@
     <MESSAGE value="frontend angelegt" />
     <MESSAGE value="frontend" />
     <MESSAGE value="api-baseurl und admin-seed" />
-    <option name="LAST_COMMIT_MESSAGE" value="api-baseurl und admin-seed" />
+    <MESSAGE value="add event management with correction modals" />
+    <option name="LAST_COMMIT_MESSAGE" value="add event management with correction modals" />
   </component>
 </project>

@@ -17,6 +17,8 @@ import {
 } from '../auth/roles'
 import { useRole } from '../auth/useRole'
 import { SeedService } from '../services/SeedService'
+import { markStudentInactive } from '../utils/inactiveStudents'
+import { Refresh } from '../utils/refresh'
 
 type EditDraft = {
   studentId: string
@@ -47,6 +49,8 @@ export default function AdminDashboard() {
   const [editTarget, setEditTarget] = useState<EventRecord | null>(null)
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null)
   const [neutralizedKeys, setNeutralizedKeys] = useState<Set<string>>(new Set())
+  const [studentDeleteTarget, setStudentDeleteTarget] = useState<Student | null>(null)
+  const [isDeletingStudent, setIsDeletingStudent] = useState(false)
   const role = useRole()
   const [roleAssignments, setRoleAssignmentsState] = useState<RoleAssignments>(() =>
     getRoleAssignments(),
@@ -56,6 +60,13 @@ export default function AdminDashboard() {
     () => new Map(students.map((student) => [student.studentId, student])),
     [students],
   )
+
+  const sortedBalances = useMemo(() => {
+    return [...balances].sort((a, b) => {
+      if (b.striche !== a.striche) return b.striche - a.striche
+      return a.name.localeCompare(b.name, 'de')
+    })
+  }, [balances])
 
   const totalBalance = balances.reduce((sum, item) => sum + (item.striche || 0), 0)
 
@@ -281,6 +292,50 @@ export default function AdminDashboard() {
     }
   }
 
+  const closeStudentDeleteModal = () => {
+    setStudentDeleteTarget(null)
+  }
+
+  const handleStudentDelete = async () => {
+    if (!studentDeleteTarget) return
+    if (!isAdminAccessKeyActive()) {
+      const message = 'Aktion erfordert ADMIN_KEY_123 im Access Key.'
+      setError(message)
+      console.log(message)
+      return
+    }
+
+    setIsDeletingStudent(true)
+    setError(null)
+    try {
+      await DataService.deleteStudent(studentDeleteTarget.studentId)
+    } catch (deleteError) {
+      const message =
+        deleteError instanceof Error
+          ? deleteError.message
+          : 'Löschen fehlgeschlagen'
+      console.log('Student löschen fehlgeschlagen', deleteError)
+      setError(`${message}. Nutzer wird lokal deaktiviert.`)
+    } finally {
+      markStudentInactive(studentDeleteTarget.studentId, studentDeleteTarget.name)
+      setStudents((prev) =>
+        prev.filter((student) => student.studentId !== studentDeleteTarget.studentId),
+      )
+      setBalances((prev) =>
+        prev.filter((balance) => balance.studentId !== studentDeleteTarget.studentId),
+      )
+      setRoleAssignmentsState((prev) => {
+        const next = { ...prev }
+        delete next[studentDeleteTarget.studentId]
+        setRoleAssignments(next)
+        return next
+      })
+      closeStudentDeleteModal()
+      Refresh.trigger()
+      setIsDeletingStudent(false)
+    }
+  }
+
   return (
     <section className="page-section admin-shell">
       <div className="container">
@@ -363,19 +418,25 @@ export default function AdminDashboard() {
                 <table className="data-table" aria-label="Kontostände">
                   <thead>
                     <tr>
+                      <th scope="col">Rang</th>
                       <th scope="col">Name</th>
                       <th scope="col">Kurs</th>
                       <th scope="col">Striche</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {balances.map((balance) => (
-                      <tr key={balance.studentId}>
-                        <td>{balance.name}</td>
-                        <td>{balance.kurs ?? '—'}</td>
-                        <td>{balance.striche}</td>
-                      </tr>
-                    ))}
+                    {sortedBalances.map((balance, index) => {
+                      const rank = index + 1
+                      const rowClass = rank <= 3 ? `leaderboard top-${rank}` : 'leaderboard'
+                      return (
+                        <tr key={balance.studentId} className={rowClass}>
+                          <td>{rank === 1 ? '👑 1' : rank}</td>
+                          <td>{balance.name}</td>
+                          <td>{balance.kurs ?? '—'}</td>
+                          <td>{balance.striche}</td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -393,6 +454,42 @@ export default function AdminDashboard() {
                   await loadData(false)
                 }}
               />
+              <div className="card admin-table">
+                <h3>Studierendenliste</h3>
+                {students.length === 0 ? (
+                  <div className="admin-helper">Keine aktiven Studenten vorhanden.</div>
+                ) : (
+                  <table className="data-table" aria-label="Studenten löschen">
+                    <thead>
+                      <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Student-ID</th>
+                        <th scope="col">Kurs</th>
+                        <th scope="col">Aktion</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {students.map((student) => (
+                        <tr key={student.studentId}>
+                          <td>{student.name}</td>
+                          <td>{student.studentId}</td>
+                          <td>{student.kurs ?? '—'}</td>
+                          <td>
+                            <button
+                              className="button danger"
+                              type="button"
+                              onClick={() => setStudentDeleteTarget(student)}
+                              disabled={isDeletingStudent}
+                            >
+                              Löschen
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </section>
 
             <section id="admin-roles" className="admin-section">
@@ -441,92 +538,94 @@ export default function AdminDashboard() {
               </div>
             </section>
 
-            <section id="admin-events" className="admin-section">
-              <div className="admin-section-header">
-                <h2 className="section-title">Events</h2>
-                <span className="admin-helper">
-                  Bearbeiten und Löschen erzeugen Korrektur-Events.
-                </span>
-              </div>
-              <div className="card admin-table">
-                <table className="data-table" aria-label="Alle Events">
-                  <thead>
-                    <tr>
-                      <th scope="col">Zeit</th>
-                      <th scope="col">Student</th>
-                      <th scope="col">Vorlesung</th>
-                      <th scope="col">Typ</th>
-                      <th scope="col">Anzahl</th>
-                      <th scope="col">Begründung</th>
-                      <th scope="col">Aktionen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedEvents.map((event) => {
-                      const student = studentById.get(event.studentId)
-                      const eventKey = buildEventKey(event)
-                      const isCorrection =
-                        event.typ === 'correction' || event.typ === 'korrektur'
-                      const typLabel = isCorrection
-                        ? 'Korrekturbuchung'
-                        : event.typ === 'minus'
-                          ? 'Minus-Event'
-                          : 'Plus-Event'
-                      const isNeutralized = neutralizedKeys.has(eventKey)
-                      return (
-                        <tr
-                          key={eventKey}
-                          className={isNeutralized ? 'event-row neutralized' : undefined}
-                        >
-                          <td>{event.timestamp}</td>
-                          <td>{student?.name ?? event.studentId}</td>
-                          <td>{event.vorlesung}</td>
-                          <td>
-                            <span
-                              className={[
-                                'event-tag',
-                                isCorrection
-                                  ? 'correction'
-                                  : event.typ === 'minus'
-                                    ? 'minus'
-                                    : 'plus',
-                              ].join(' ')}
-                            >
-                              {typLabel}
-                            </span>
-                          </td>
-                          <td>{event.anzahl}</td>
-                          <td>{event.begruendung}</td>
-                          <td>
-                            <div className="inline-actions">
-                              <button
-                                className="button secondary"
-                                type="button"
-                                disabled={isCorrection || isNeutralized || busyKey !== null}
-                                onClick={() => openEditModal(event)}
+            {role === 'Admin' ? (
+              <section id="admin-events" className="admin-section">
+                <div className="admin-section-header">
+                  <h2 className="section-title">Events</h2>
+                  <span className="admin-helper">
+                    Bearbeiten und Löschen erzeugen Korrektur-Events.
+                  </span>
+                </div>
+                <div className="card admin-table">
+                  <table className="data-table" aria-label="Alle Events">
+                    <thead>
+                      <tr>
+                        <th scope="col">Zeit</th>
+                        <th scope="col">Student</th>
+                        <th scope="col">Vorlesung</th>
+                        <th scope="col">Typ</th>
+                        <th scope="col">Anzahl</th>
+                        <th scope="col">Begründung</th>
+                        <th scope="col">Aktionen</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedEvents.map((event) => {
+                        const student = studentById.get(event.studentId)
+                        const eventKey = buildEventKey(event)
+                        const isCorrection =
+                          event.typ === 'correction' || event.typ === 'korrektur'
+                        const typLabel = isCorrection
+                          ? 'Korrekturbuchung'
+                          : event.typ === 'minus'
+                            ? 'Minus-Event'
+                            : 'Plus-Event'
+                        const isNeutralized = neutralizedKeys.has(eventKey)
+                        return (
+                          <tr
+                            key={eventKey}
+                            className={isNeutralized ? 'event-row neutralized' : undefined}
+                          >
+                            <td>{event.timestamp}</td>
+                            <td>{student?.name ?? event.studentId}</td>
+                            <td>{event.vorlesung}</td>
+                            <td>
+                              <span
+                                className={[
+                                  'event-tag',
+                                  isCorrection
+                                    ? 'correction'
+                                    : event.typ === 'minus'
+                                      ? 'minus'
+                                      : 'plus',
+                                ].join(' ')}
                               >
-                                Bearbeiten
-                              </button>
-                              <button
-                                className="button danger"
-                                type="button"
-                                disabled={isCorrection || isNeutralized || busyKey !== null}
-                                onClick={() => {
-                                  setDeleteTarget(event)
-                                  setDeleteReason('')
-                                }}
-                              >
-                                Löschen
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+                                {typLabel}
+                              </span>
+                            </td>
+                            <td>{event.anzahl}</td>
+                            <td>{event.begruendung}</td>
+                            <td>
+                              <div className="inline-actions">
+                                <button
+                                  className="button secondary"
+                                  type="button"
+                                  disabled={isCorrection || isNeutralized || busyKey !== null}
+                                  onClick={() => openEditModal(event)}
+                                >
+                                  Bearbeiten
+                                </button>
+                                <button
+                                  className="button danger"
+                                  type="button"
+                                  disabled={isCorrection || isNeutralized || busyKey !== null}
+                                  onClick={() => {
+                                    setDeleteTarget(event)
+                                    setDeleteReason('')
+                                  }}
+                                >
+                                  Löschen
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            ) : null}
           </div>
         </div>
       </div>
@@ -709,6 +808,47 @@ export default function AdminDashboard() {
                 disabled={busyKey === 'edit'}
               >
                 {busyKey === 'edit' ? 'Speichere…' : 'Speichern'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {studentDeleteTarget ? (
+        <div className="modal-backdrop" role="presentation">
+          <div className="modal" role="dialog" aria-modal="true" aria-label="Student löschen">
+            <div className="modal-header">
+              <h3>Student löschen</h3>
+              <button
+                className="button secondary"
+                type="button"
+                onClick={closeStudentDeleteModal}
+              >
+                Schließen
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="admin-helper">
+                Möchtest du {studentDeleteTarget.name} wirklich löschen? Alle bisherigen
+                Events bleiben in der Historie gespeichert, aber der Nutzer taucht nicht
+                mehr in den Listen auf.
+              </p>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="button secondary"
+                type="button"
+                onClick={closeStudentDeleteModal}
+                disabled={isDeletingStudent}
+              >
+                Abbrechen
+              </button>
+              <button
+                className="button danger"
+                type="button"
+                onClick={handleStudentDelete}
+                disabled={isDeletingStudent}
+              >
+                {isDeletingStudent ? 'Lösche…' : 'Löschen'}
               </button>
             </div>
           </div>

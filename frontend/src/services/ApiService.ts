@@ -67,3 +67,8 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 
   return response.json() as Promise<T>
 }
+
+export function deleteStudent(id: string): Promise<void> {
+  const encoded = encodeURIComponent(id)
+  return request<void>(`/students/${encoded}`, { method: 'DELETE' })
+}
