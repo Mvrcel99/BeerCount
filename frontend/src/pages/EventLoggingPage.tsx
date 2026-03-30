@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useRole } from '../auth/useRole'
 import { DataService, type Student } from '../services/DataService'
 import { Refresh } from '../utils/refresh'
+import { formatUmlauts } from '../utils/umlaute'
 
 type EventMode = 'plus' | 'minus'
 
@@ -282,13 +283,13 @@ export default function EventLoggingPage() {
                   disabled={!hasStudents}
                   required
                 >
-                  {students.map((student) => (
-                    <option key={student.studentId} value={student.studentId}>
-                      {student.name} ({student.studentId})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                      {students.map((student) => (
+                        <option key={student.studentId} value={student.studentId}>
+                          {formatUmlauts(student.name)} ({student.studentId})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
               <div className="form-field">
                 <label>Event-Typ</label>
@@ -346,7 +347,7 @@ export default function EventLoggingPage() {
                     >
                       {lectureOptions.map((lecture) => (
                         <option key={lecture} value={lecture}>
-                          {lecture}
+                          {formatUmlauts(lecture)}
                         </option>
                       ))}
                       <option value={CUSTOM_LECTURE_VALUE}>Andere Vorlesung…</option>
@@ -373,7 +374,7 @@ export default function EventLoggingPage() {
                             setCustomLecture('')
                           }}
                         >
-                          Hinzufuegen
+                          Hinzufügen
                         </button>
                       </div>
                     ) : null}
@@ -451,7 +452,7 @@ export default function EventLoggingPage() {
                   onClick={resetForm}
                   disabled={isSubmitting}
                 >
-                  Zuruecksetzen
+                  Zurücksetzen
                 </button>
               </div>
             </form>

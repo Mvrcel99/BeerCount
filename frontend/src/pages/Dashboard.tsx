@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { DataService, type Balance } from '../services/DataService'
 import { Refresh } from '../utils/refresh'
+import { formatUmlauts } from '../utils/umlaute'
 
 export default function Dashboard() {
   const [balances, setBalances] = useState<Balance[]>([])
@@ -82,7 +83,7 @@ export default function Dashboard() {
                   return (
                     <tr key={student.studentId} className={rowClass}>
                       <td>{rank === 1 ? '1' : rank}</td>
-                      <td>{student.name}</td>
+                      <td>{formatUmlauts(student.name)}</td>
                       <td>{student.striche}</td>
                     </tr>
                   )

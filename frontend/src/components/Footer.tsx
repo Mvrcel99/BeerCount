@@ -5,9 +5,9 @@ export default function Footer() {
 
   return (
     <footer className="app-footer">
-      {/* Fussbereich mit Pflichtangaben */}
+      {/* Fußbereich mit Pflichtangaben */}
       <div className="container footer-inner">
-        <span>© {jahr} BierLog – Pruefungsprojekt</span>
+        <span>© {jahr} BierLog – Prüfungsprojekt</span>
         <div className="footer-links">
           <NavLink to="/impressum">Impressum</NavLink>
           <NavLink to="/datenschutz">Datenschutz</NavLink>

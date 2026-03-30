@@ -11,7 +11,7 @@ export const events = [
     studentId: 's1',
     typ: 'plus',
     anzahl: 2,
-    begruendung: 'Getraenk nach Abgabe',
+    begruendung: 'Getränk nach Abgabe',
     zeitstempel: '2026-02-24T18:12:00Z',
   },
   {
@@ -19,7 +19,7 @@ export const events = [
     studentId: 's2',
     typ: 'minus',
     anzahl: 1,
-    begruendung: 'Rueckgabe',
+    begruendung: 'Rückgabe',
     zeitstempel: '2026-02-25T09:30:00Z',
   },
   {

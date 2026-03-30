@@ -4,7 +4,7 @@ export default function Impressum() {
       <div className="container">
         <h1>Impressum</h1>
         <p className="section-intro">
-          Die folgenden Angaben dienen als Platzhalter fuer ein Pruefungsprojekt.
+          Die folgenden Angaben dienen als Platzhalter für ein Prüfungsprojekt.
         </p>
         <div className="card text-block">
           <h2>Anbieter</h2>
@@ -13,8 +13,8 @@ export default function Impressum() {
           <p>E-Mail: kontakt@bierlog-beispiel.de</p>
           <h2>Haftungsausschluss</h2>
           <p>
-            Die Inhalte dieser Anwendung wurden mit Sorgfalt erstellt. Eine Haftung fuer
-            die Richtigkeit, Vollstaendigkeit und Aktualitaet kann jedoch nicht
+            Die Inhalte dieser Anwendung wurden mit Sorgfalt erstellt. Eine Haftung für
+            die Richtigkeit, Vollständigkeit und Aktualität kann jedoch nicht
             übernommen werden.
           </p>
         </div>

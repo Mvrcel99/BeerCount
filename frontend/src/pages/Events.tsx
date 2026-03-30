@@ -4,6 +4,7 @@ import { formatiereDatum } from '../utils/berechnungen'
 import { DataService, type EventRecord, type Student } from '../services/DataService'
 import { Refresh } from '../utils/refresh'
 import { getInactiveStudents } from '../utils/inactiveStudents'
+import { formatUmlauts } from '../utils/umlaute'
 
 type DisplayEvent = {
   key: string
@@ -148,7 +149,7 @@ export default function Events() {
               <option value="">Alle Studenten</option>
               {students.map((student) => (
                 <option key={student.studentId} value={student.studentId}>
-                  {student.name} ({student.studentId})
+                  {formatUmlauts(student.name)} ({student.studentId})
                 </option>
               ))}
             </select>
@@ -208,6 +209,7 @@ export default function Events() {
               const name =
                 studentNachId.get(event.studentId) ??
                 (inactiveName ? `${inactiveName} (ehem.)` : 'Unbekannt')
+              const displayName = formatUmlauts(name)
               const isCorrection =
                 event.typ === 'correction' || event.typ === 'korrektur'
               const isMinus = event.typ === 'minus'
@@ -228,12 +230,12 @@ export default function Events() {
                 >
                   <div>
                     <div className="event-meta">{formatiereDatum(event.timestamp)}</div>
-                    <h3 className="event-title">{name}</h3>
+                    <h3 className="event-title">{displayName}</h3>
                     <p className="event-detail">
-                      {event.begruendung}
+                      {formatUmlauts(event.begruendung)}
                       {detailSuffix}
                     </p>
-                    <p className="admin-helper">{event.vorlesung}</p>
+                    <p className="admin-helper">{formatUmlauts(event.vorlesung)}</p>
                   </div>
                   <div className="event-values">
                     <span className="event-typ">{typBezeichnung}</span>

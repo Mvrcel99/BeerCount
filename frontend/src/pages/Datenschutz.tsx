@@ -2,10 +2,10 @@ export default function Datenschutz() {
   return (
     <section className="page-section">
       <div className="container">
-        <h1>Datenschutzerklaerung</h1>
+        <h1>Datenschutzerklärung</h1>
         <p className="section-intro">
-          Diese Erklaerung beschreibt die Verarbeitung von Daten innerhalb des
-          Pruefungsprojekts.
+          Diese Erklärung beschreibt die Verarbeitung von Daten innerhalb des
+          Prüfungsprojekts.
         </p>
         <div className="card text-block">
           <h2>Zweck der Anwendung</h2>
@@ -13,17 +13,17 @@ export default function Datenschutz() {
           <h2>Verarbeitete Daten</h2>
           <p>
             Verarbeitet werden Namen der Teilnehmer, Ereignistypen, Mengen sowie
-            Zeitstempel der Eintraege. Es handelt sich um Projektannahmen.
+            Zeitstempel der Einträge. Es handelt sich um Projektannahmen.
           </p>
           <h2>Speicherdauer</h2>
-          <p>Die Daten werden fuer die Dauer des Projektzeitraums gespeichert.</p>
+          <p>Die Daten werden für die Dauer des Projektzeitraums gespeichert.</p>
           <h2>Rechte der Betroffenen</h2>
           <ul className="bullet-list">
-            <li>Auskunft ueber gespeicherte Daten</li>
+            <li>Auskunft über gespeicherte Daten</li>
             <li>Berichtigung unrichtiger Angaben</li>
-            <li>Loeschung nach Projektende</li>
+            <li>Löschung nach Projektende</li>
           </ul>
-          <p>Hinweis: Dies ist ein Pruefungsprojekt.</p>
+          <p>Hinweis: Dies ist ein Prüfungsprojekt.</p>
         </div>
       </div>
     </section>

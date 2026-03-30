@@ -19,6 +19,7 @@ import { useRole } from '../auth/useRole'
 import { SeedService } from '../services/SeedService'
 import { markStudentInactive } from '../utils/inactiveStudents'
 import { Refresh } from '../utils/refresh'
+import { formatUmlauts } from '../utils/umlaute'
 
 type EditDraft = {
   studentId: string
@@ -431,8 +432,8 @@ export default function AdminDashboard() {
                       return (
                         <tr key={balance.studentId} className={rowClass}>
                           <td>{rank === 1 ? '👑 1' : rank}</td>
-                          <td>{balance.name}</td>
-                          <td>{balance.kurs ?? '—'}</td>
+                          <td>{formatUmlauts(balance.name)}</td>
+                          <td>{formatUmlauts(balance.kurs ?? '—')}</td>
                           <td>{balance.striche}</td>
                         </tr>
                       )
@@ -471,7 +472,7 @@ export default function AdminDashboard() {
                     <tbody>
                       {students.map((student) => (
                         <tr key={student.studentId}>
-                          <td>{student.name}</td>
+                          <td>{formatUmlauts(student.name)}</td>
                           <td>{student.studentId}</td>
                           <td>{student.kurs ?? '—'}</td>
                           <td>
@@ -513,7 +514,7 @@ export default function AdminDashboard() {
                       const role = roleAssignments[student.studentId] ?? 'Student'
                       return (
                         <tr key={student.studentId}>
-                          <td>{student.name}</td>
+                          <td>{formatUmlauts(student.name)}</td>
                           <td>{student.studentId}</td>
                           <td>
                             <select
@@ -577,8 +578,8 @@ export default function AdminDashboard() {
                             className={isNeutralized ? 'event-row neutralized' : undefined}
                           >
                             <td>{event.timestamp}</td>
-                            <td>{student?.name ?? event.studentId}</td>
-                            <td>{event.vorlesung}</td>
+                          <td>{student ? formatUmlauts(student.name) : event.studentId}</td>
+                          <td>{formatUmlauts(event.vorlesung)}</td>
                             <td>
                               <span
                                 className={[
@@ -594,7 +595,7 @@ export default function AdminDashboard() {
                               </span>
                             </td>
                             <td>{event.anzahl}</td>
-                            <td>{event.begruendung}</td>
+                          <td>{formatUmlauts(event.begruendung)}</td>
                             <td>
                               <div className="inline-actions">
                                 <button
@@ -702,7 +703,7 @@ export default function AdminDashboard() {
                   >
                     {students.map((student) => (
                       <option key={student.studentId} value={student.studentId}>
-                        {student.name} ({student.studentId})
+                        {formatUmlauts(student.name)} ({student.studentId})
                       </option>
                     ))}
                   </select>
@@ -828,7 +829,7 @@ export default function AdminDashboard() {
             </div>
             <div className="modal-body">
               <p className="admin-helper">
-                Möchtest du {studentDeleteTarget.name} wirklich löschen? Alle bisherigen
+                Möchtest du {formatUmlauts(studentDeleteTarget.name)} wirklich löschen? Alle bisherigen
                 Events bleiben in der Historie gespeichert, aber der Nutzer taucht nicht
                 mehr in den Listen auf.
               </p>
