@@ -8,7 +8,7 @@ export default function Impressum() {
         </p>
         <div className="card text-block">
           <h2>Anbieter</h2>
-          <p>BierLog Projektteam, Musterhochschule, 12345 Musterstadt.</p>
+          <p>BierLog Projektteam, DHBW Heidenheim, 89518 Heidenheim.</p>
           <h2>Kontakt</h2>
           <p>E-Mail: kontakt@bierlog-beispiel.de</p>
           <h2>Haftungsausschluss</h2>
