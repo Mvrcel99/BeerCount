@@ -39,3 +39,36 @@ Starte das NestJS-Backend im Entwicklungsmodus (mit Auto-Reload):
 npm run start:dev
 
 ```
+### 4. Frontend-Abhängigkeiten installieren
+
+Wechsle in den `frontend`-Ordner und installiere die benötigten Node-Pakete:
+
+```bash
+cd frontend
+npm install
+
+```
+
+### 5. Frontend starten
+
+Starte das React_frontend:
+
+```bash
+npm run dev
+
+```
+
+---
+
+### Rollen & Zugriff (Access Keys)
+Das System nutzt **Access Keys**, um zwischen den verschiedenen Benutzerrollen zu wechseln:
+
+| Rolle            | Access Key          | Beschreibung & Berechtigungen                                                                 |
+|:-----------------|:--------------------|:----------------------------------------------------------------------------------------------|
+| **Admin** | `ADMIN_KEY_123`     | Voller Zugriff: Admin-Dashboard, User-Verwaltung, Bearbeiten/Löschen von Events, Statistiken. |
+| **Kurssprecher** | `KURS_KEY_123`      | Erweitertes Logging: Darf sowohl Störungen (+1) als auch Bier-Ausgaben (beliebig) erfassen.   |
+| **Student** | `STUDENT_KEY_123`   | Basis-Logging: Kann die Bilanz einsehen und Störungen (+1) für andere melden.                 |
+
+**Hinweis zum Rollenwechsel:** Um die Rolle zu wechseln, lösche den aktuellen Key über die "Acess-Key"-Funktion im Header.
+
+

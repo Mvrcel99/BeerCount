@@ -48,8 +48,8 @@ export default function EventLoggingPage() {
 
   const isKurssprecher = role === 'Kurssprecher'
   const isAdmin = role === 'Admin'
-  const canChooseEventType = role === 'Admin' || role === 'Kurssprecher'
   const isStudent = role === 'Student'
+  const canChooseEventType = isAdmin || isKurssprecher
   const hasStudents = students.length > 0
 
   useEffect(() => {
