@@ -9,11 +9,13 @@ import { SwaggerModule } from '@nestjs/swagger/dist/swagger-module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  if (process.env.NODE_ENV !== 'production') {
-    app.enableCors();
-  }
+  app.enableCors({
+    origin: true, // Erlaubt alle Origins (einfachste Lösung)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Accept', 'x-access-key'], // Wichtig für deinen Custom Header!
+  });
 
-  if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('BierCounter API')
       .setDescription('Event-Logging für die DHBW Heidenheim WWI2024')
@@ -30,7 +32,7 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document, {
       swaggerOptions: { persistAuthorization: true },
     });
-  }
+  
 
   app.useGlobalPipes(
     new ValidationPipe({

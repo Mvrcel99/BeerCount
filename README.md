@@ -1,27 +1,59 @@
-# Bier Counter - Event Logging Backend
+# BierLog – Event Logging System
 
-Dieses Projekt ist das Backend für den "Bier Log" (Neue Datenbankkonzepte). Es nutzt **NestJS** als API-Framework und **InfluxDB** als Time-Series-Datenbank, um Events (Störungen/Bier-Schulden) revisionssicher zu loggen.
+Das Backend für das Projekt **"BierLog"** (Modul: Neue Datenbankkonzepte). Diese Applikation dient zum revisionssicheren Loggen von Bier-Events (Schulden/Guthaben) der DHBW Heidenheim (WWI2024).
 
-## Voraussetzungen
+## Tech-Stack
 
-
-* **Docker & Docker Compose** (für die Datenbank)
+* **Framework:** [NestJS](https://nestjs.com/) (Node.js)
+* **Datenbank:** [InfluxDB 2.7](https://www.influxdata.com/) (Time-Series DB für lückenlose Historie)
+* **Infrastruktur:** Docker & Docker Compose
+* **Dokumentation:** Swagger / OpenAPI
 
 ---
 
-## Projekt starten 
+## Schnellstart (Deployment)
 
-### 1. Datenbank hochfahren
-Wir nutzen Docker, um die InfluxDB, Frontend und Backend lokal bereitzustellen. Öffnen Sie das Terminal im Hauptverzeichnis und starte den Container:
+Stellen Sie sicher, dass **Docker** installiert ist. Führen Sie im Hauptverzeichnis des Projekts folgenden Befehl aus:
+Startet InfluxDB, Backend und Frontend im Hintergrund
+
 ```bash
-docker-compose up -d
-
+docker-compose up -d --build
 ```
 
-*Das InfluxDB-Dashboard ist nun unter `http://localhost:8086` erreichbar (Login: admin / biercounter123).*
+### Verfügbare Dienste & Dashboards
+
+| Dienst | URL | Anmeldedaten |
+| :--- | :--- | :--- |
+| **Frontend (Web App)** | [http://localhost](http://localhost) | – |
+| **API Swagger Docs** | [http://localhost:3000/api/docs](http://localhost:3000/api/docs) | – |
+| **InfluxDB Dashboard** | [http://localhost:8086](http://localhost:8086) | `admin` / `biercounter123` |
+
+---
+
+## API Dokumentation (Swagger)
+
+Die gesamte API ist über Swagger dokumentiert. Dort können Endpunkte direkt getestet werden.
+
+**URL:** `http://localhost:3000/api/docs`
+
+*Hinweis: Für administrative Endpunkte muss im Header der `x-access-key` (Standard: `ADMIN_KEY_123`) gesetzt werden.*
+
+---
+
+## Entwicklung
+
+Falls Sie das Backend ohne Docker (lokal) für die Entwicklung starten möchten:
+
+1.  Abhängigkeiten installieren: `npm install`
+2.  Umgebungsvariablen in der `.env` prüfen.
+3.  Starten: `npm run start:dev`
+
+---
+
+**Projekt im Rahmen der Vorlesung "Neue Datenbankkonzepte" – DHBW Heidenheim.**
 
 
-### Rollen & Zugriff (Access Keys)
+## Rollen & Zugriff (Access Keys)
 Das System nutzt **Access Keys**, um zwischen den verschiedenen Benutzerrollen zu wechseln:
 
 | Rolle            | Access Key          | Beschreibung & Berechtigungen                                                                 |
