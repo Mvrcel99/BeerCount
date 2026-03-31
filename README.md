@@ -1,6 +1,6 @@
 # BierLog – Event Logging System
 
-Das Backend für das Projekt **"BierLog"** (Modul: Neue Datenbankkonzepte). Diese Applikation dient zum revisionssicheren Loggen von Bier-Events (Schulden/Guthaben) der DHBW Heidenheim (WWI2024).
+Das Backend für das Projekt **"BierLog"** (Modul: Neue Datenbankkonzepte) der Gruppe A12. Diese Applikation dient zum revisionssicheren Loggen von Bier-Events (Schulden/Guthaben) der DHBW Heidenheim (WWI2024).
 
 ## Tech-Stack
 
@@ -50,7 +50,7 @@ Falls Sie das Backend ohne Docker (lokal) für die Entwicklung starten möchten:
 
 ---
 
-**Projekt im Rahmen der Vorlesung "Neue Datenbankkonzepte" – DHBW Heidenheim.**
+
 
 
 ## Rollen & Zugriff (Access Keys)
@@ -63,5 +63,8 @@ Das System nutzt **Access Keys**, um zwischen den verschiedenen Benutzerrollen z
 | **Student** | `STUDENT_KEY_123`   | Basis-Logging: Kann die Bilanz einsehen und Störungen (+1) für andere melden.                 |
 
 **Hinweis zum Rollenwechsel:** Um die Rolle zu wechseln, lösche den aktuellen Key über die "Acess-Key"-Funktion im Header.
+
+---
+*Projekt im Rahmen der Vorlesung "Neue Datenbankkonzepte" – DHBW Heidenheim WWI24A Gruppe A12.*
 
 
